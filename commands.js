@@ -1,14 +1,15 @@
 var fs = require('fs');
+var request = require('request')
 
 var done = function(output) {
     process.stdout.write(output);
     setTimeout(function() {
-        process.stdout.write('\nnewprompt > ');
+        process.stdout.write('\nprompt > ');
     }, 0);
 }
 
 exports.pwd = function(file) {
-    done(process.argv[1]);
+    done(process.argv[1].toString());
 }
 
 exports.date = function(file) {
@@ -17,7 +18,6 @@ exports.date = function(file) {
 }
 
 exports.ls = function(file) {
-    //var fs = require('fs');
     fs.readdir('.', function(err, files) {
         if (err) throw err;
         var output = "";
@@ -33,7 +33,6 @@ exports.echo = function(file) {
 }
 
 exports.cat = function(file) {
-    //var fs = require('fs');
     fs.readFile(file, function(err, data) {
         if (err) throw err;
         done(data);
@@ -42,10 +41,6 @@ exports.cat = function(file) {
 }
 
 exports.head = function(file) {
-    // fs.read(fd, buffer, 0, 1, 0, function(err, bytesRead, buffer) {
-    //     done
-    // })
-
     fs.readFile(file, function(err, data) {
         if (err) throw err;
         var lines = data.toString("utf-8").split("\n");
@@ -68,3 +63,46 @@ exports.tail = function(file) {
         done(output);
     });
 }
+
+exports.sort = function(file) {
+    fs.readFile(file, function(err, data) {
+        if (err) throw err;
+        var lines = data.toString("utf-8").split("\n");
+        done(lines.sort().join('\n'))
+    });
+}
+
+exports.wc = function(file) {
+    fs.readFile(file, function(err, data) {
+        if (err) throw err;
+        var lines = data.toString("utf-8").split("\n");
+        var output = lines.length.toString()
+        done(output)
+    });
+}
+
+exports.uniq = function(file) {
+    fs.readFile(file, function(err, data) {
+        if (err) throw err;
+        var lines = data.toString("utf-8").split("\n");
+        var output = lines.filter(function(elem,ind) {
+            if(elem === lines[ind-1]) return false;
+            else return true;
+        }).join('\n')
+        done(output)
+    });
+}
+
+exports.curl = function(file) {
+    // var http = 'http'
+    // var www = 'www.'
+    // if (file.includes(www) && file.includes(http)) {
+        request(file, function(err, response, body) {
+            if (err) throw err;
+            done(body.toString())
+        })
+    // } else {
+    //     throw 'invalid url';
+    // }
+}
+
